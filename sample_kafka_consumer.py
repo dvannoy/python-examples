@@ -4,7 +4,7 @@ from kafka import KafkaClient, SimpleConsumer
 from sys import argv
 from config import KAFKA_URL
 
-kafka = KafkaClient("KAFKA_URL:6667")
+kafka = KafkaClient(KAFKA_URL)
 consumer = SimpleConsumer(kafka, "sample-group", argv[1])
 consumer.max_buffer_size=0
 consumer.seek(0,2)
