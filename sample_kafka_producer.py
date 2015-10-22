@@ -1,14 +1,35 @@
-# started with example at https://kafka-python.readthedocs.org/en/latest/usage.html
-# need to pip install kafka-python
-from kafka import KafkaClient, SimpleProducer
-from sys import argv
+""" Simple kafka-python sample based on example at https://kafka-python.readthedocs.org/en/latest/usage.html
+  * if not installed run 'pip install kafka-python' in terminal
+  * if topic doesn't exist, must have kafka cluster setup to auto create topic or create it manually
+  * if creating topic for first time, may receive an error on sending message, just run it again
+  * if using AWS make sure server names are in your hosts file since it will return info on the brokers
+"""
+from kafka import KafkaClient, SimpleProducer, KeyedProducer, create_message
+from kafka.common import ProduceRequest, FailedPayloadsError
 from config import KAFKA_URL
+import logging
+
+logging.basicConfig(
+   format='%(asctime)s.%(msecs)s:%(name)s:%(thread)d:%(levelname)s:%(process)d:%(message)s',
+   level=logging.WARN
+)
 
 kafka = KafkaClient(KAFKA_URL)
 producer = SimpleProducer(kafka)
-producer.send_messages(b'sample-topic-1', b'test message 1')
-producer.send_messages(b'sample-topic-1', b'test message 2', b'etc')
-
+# send basic messages
+try:
+	producer.send_messages(b'python-sample-topic-1', b'test message 1')
+	producer.send_messages(b'python-sample-topic-1', b'test message 2', b'test 3 additional message')
+except FailedPayloadsError as e:
+	print 'Simple Producer payload exception...'
+	print e
+#send keyed message
+producer2 = KeyedProducer(kafka)
+try:
+	producer2.send_messages(b'python-sample-topic-1', b'key1', b'test keyed message 1')
+except FailedPayloadsError as e:
+	print 'Keyed Producer payload exception...'
+	print e
 
 
 # # To send messages asynchronously
