@@ -1,4 +1,4 @@
-""" Simple kafka-python sample based on example at https://kafka-python.readthedocs.org/en/latest/usage.html
+""" Simple kafka-python sample based on example at https://kafka-python.readthedocs.org/en/latest/usage.html.
   * if not installed run 'pip install kafka-python' in terminal
   * if topic doesn't exist, must have kafka cluster setup to auto create topic or create it manually
   * if creating topic for first time, may receive an error on sending message, just run it again
@@ -7,12 +7,6 @@
 from kafka import KafkaClient, SimpleProducer, KeyedProducer, create_message
 from kafka.common import ProduceRequest, FailedPayloadsError
 from config import KAFKA_URL
-import logging
-
-logging.basicConfig(
-   format='%(asctime)s.%(msecs)s:%(name)s:%(thread)d:%(levelname)s:%(process)d:%(message)s',
-   level=logging.WARN
-)
 
 kafka = KafkaClient(KAFKA_URL)
 producer = SimpleProducer(kafka)
