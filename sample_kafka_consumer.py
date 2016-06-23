@@ -15,13 +15,21 @@ logging.basicConfig(
 )
 
 topic = argv[1] #enter topic as parameter when running script
+#group = "sample-group-1" #only use if trying to consume in parallel
+group = None
+if len(argv) > 2 and argv[2] == 'reset':
+    auto_offset_reset = 'earliest'
+else:
+    auto_offset_reset = 'latest'
 
 try:
-    consumer = KafkaConsumer(topic, "sample-group1",bootstrap_servers=[KAFKA_URL])
+    consumer = KafkaConsumer(topic, group_id=group, bootstrap_servers=[KAFKA_URL], auto_offset_reset=auto_offset_reset)
+    #consumer.subscribe([topic])
     consumer.max_buffer_size=0
     for message in consumer:
         #print message.encode('utf-8')
-        print("OFFSET: " + str(message[3]) + "\t KEY: " + str(message[3]) + "\t MSG: " + str(message[4]))
+        #print("OFFSET: " + str(message[3]) + "\t KEY: " + str(message[3]) + "\t MSG: " + str(message[4]))
+        print str(message[4])
 except Exception as e:
     print 'Error in consumer...'
     print e
