@@ -78,10 +78,67 @@ df["subject_age"].head()
 # add column (will overwrite if column already exists)
 df["new_col"] = df["subject_age"] + 1
 
-# add at speific location
+# add at specific location
 df.insert(0, column = "new_col2", value = "new")
 
 df["sd_resident"].fillna("Unknown")
 
 val_cnts = df["sd_resident"].value_counts()
 print(val_cnts.head())
+
+# Type conversions
+# df.info()
+df["stop_dt"] = pd.to_datetime(df["stop_date"])
+
+def convert_to_bool(item):
+    if item == 'Y':
+        return True
+    elif item == 'N':
+        return False
+    return None
+
+df["sd_resident"] = df["sd_resident"].apply(convert_to_bool).astype("bool")
+print(df["stop_dt"].head())
+print(df["sd_resident"].head())
+
+# Filtering
+filtered_df = df[df["sd_resident"] == False]
+print(filtered_df.head())
+
+
+
+#Deduplicate (but watch out since it handles NaN as a value when deduping)
+df2 = pd.DataFrame([{"city": "San Diego", "motto": "Americas finest city", "score": 110},
+               {"city": "Los Angeles", "motto": "City of Angels", "score": 90},
+                {"city": "San Francisco", "motto": "Tech capital", "score": 85},
+               {"city": "Seattle",  "motto": "Rainy as hell", "score": 82},
+               {"city": "Chicago", "motto":  "Da Bears", "score": 87},
+               {"city": "Chicago", "motto": "Da Bears", "score": 80}])
+
+mask = df2["city"].duplicated(keep = False)
+deduped_df = df2[mask]
+# or negate the result to get duplicates
+mask = ~df2["city"].duplicated(keep = False)
+negated_df = df2[mask]
+# or dedupe dataframe based on group of fields
+combo = df2.drop_duplicates(subset = ["city","motto"], keep = "first")
+
+# Set Index with column from dataframe and lookup by index
+#  note: could also undo that with .reset_index()
+df.set_index("stop_id", inplace = True)
+print(df.head())
+# lookup on index, faster if sorted
+df.sort_index(inplace= True)
+print(df.loc[1330071])
+# can still read by postion
+print(df.iloc[3:5])
+
+
+# Rename columns
+df.rename(columns = {"stop_id": "id", "subject_age": "age"}, inplace = True)
+
+
+
+
+
+
