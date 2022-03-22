@@ -14,7 +14,7 @@ from config import kafka_config, twitter_config
 
 logging.basicConfig(
    format='%(asctime)s.%(msecs)s:%(name)s:%(thread)d:%(levelname)s:%(process)d:%(message)s',
-   level=logging.DEBUG
+   level=logging.INFO
 )
 log = logging.getLogger("TwitterStream")
 
@@ -46,13 +46,14 @@ class TwitterStreamer():
             listener = ListenerTS()
             auth = self.twitterAuth.authenticateTwitterApp()
             stream = Stream(auth, listener)
-            stream.filter(track=track_list, stall_warnings=True, languages= ["en", "es"])
+            stream.filter(track=track_list, filter_level="low", stall_warnings=True, languages= ["en", "es"])
 
 
 class ListenerTS(StreamListener):
 
     def on_data(self, raw_data):
-            log.debug(raw_data)
+            # log.info(raw_data)
+            print(json.loads(raw_data)['text'], json.loads(raw_data)['entities']['hashtags'])
             try:
                 id = str.encode(json.loads(raw_data)['id_str'])
             except (KeyError, TypeError):
@@ -65,13 +66,15 @@ class ListenerTS(StreamListener):
 if __name__ == "__main__":
     producer = Producer(**kafka_config)
     topic_name = "tech_twitter"
-    track_list = ["Azure", "AzureSynapse", "AzureDatabricks", "Databricks", "AzureDataLake", "AzureDataLakeGen2",
-                  "AzureDataFactory", "HDInsight", "AzureIoT", "CosmosDB", "AzureSQL", "PowerBI", "ApacheSpark",
-                  "ApacheKafka", "Confluent", "Airflow", "DataEngineering"]
+    track_list = ["DataEngineering", "AzureSynapse", "Azure Synapse", "Databricks", "AzureDataLake", "Azure Data Lake",
+                  "AzureDataLakeGen2", "AzureDataFactory", "HDInsight", "AzureIoT", "CosmosDB", "AzureSQL", "PowerBI",
+                  "ApacheSpark", "Apache Spark", "ApacheKafka", "Apache Kafka", "Confluent", "Amazon EMR",
+                  "AWS Athena", "AWS Glue", "Redshift", "Apache Airflow"]
 
     try:
         TS = TwitterStreamer()
         TS.stream_tweets()
     except Exception as err:
-        producer.flush()
         raise err
+    finally:
+        producer.flush()

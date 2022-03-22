@@ -7,7 +7,7 @@ and also used example at http://www.makedatauseful.com/kafka-consumer-simple-pyt
 #from kafka import KafkaClient, SimpleConsumer, KafkaConsumer
 from confluent_kafka import Consumer, KafkaError
 from sys import argv
-from config import KAFKA_URL
+from config import kafka_config
 import logging
 
 logging.basicConfig(
@@ -15,25 +15,25 @@ logging.basicConfig(
    level=logging.WARN
 )
 
-topic = argv[1] #enter topic as parameter when running script
+topic = "tech_twitter" # argv[1] #enter topic as parameter when running script
 group = "sample-group-1" #only use if trying to consume in parallel
-#group = None
+
 if len(argv) > 2 and argv[2] == 'reset':
-    #auto_offset_reset = 'earliest'
     auto_offset_reset = 'smallest'
 else:
     auto_offset_reset = 'latest'
 
-consumer = Consumer({'bootstrap.servers': KAFKA_URL, 'group.id': group,
-              'default.topic.config': {'auto.offset.reset': auto_offset_reset}})
+kafka_config["group.id"] = group
+kafka_config["default.topic.config"] = {'auto.offset.reset': auto_offset_reset}
+
+consumer = Consumer(kafka_config)
 consumer.subscribe([topic])
 
 running = True
 while running:
     message = consumer.poll()
     if not message.error():
-        print('Received message: %s' % message.value().decode('utf-8'))
-        #print str(message[4])
+        print(message.value().decode('utf-8'))
     elif message.error().code() != KafkaError._PARTITION_EOF:
         print(message.error())
         running = False
